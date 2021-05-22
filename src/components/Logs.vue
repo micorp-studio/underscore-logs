@@ -9,14 +9,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  nextTick,
-  PropType,
-  ref,
-  watch,
-  watchEffect,
-} from 'vue'
+import { defineComponent, nextTick, PropType, ref, watch } from 'vue'
 
 type Log = {
   hostname: string
@@ -30,7 +23,8 @@ type Log = {
 export default defineComponent({
   props: {
     file: { type: Object as PropType<File> },
-    play: { type: Boolean },
+    status: { type: Object as PropType<{ play: boolean; atTime: number }> },
+    seekTime: { type: Number, default: 0 },
   },
   setup(props) {
     let logs: Log[] = []
@@ -45,7 +39,7 @@ export default defineComponent({
 
     const updateView = (seekTime: number) => {
       displayedLogs.value = []
-      const time = beginTime + seekTime
+      const time = beginTime + seekTime * 1000
       cursor = 0
       for (let i = logs.length - 1; i > 0; i--) {
         if (logs[i].time <= time) {
@@ -57,22 +51,35 @@ export default defineComponent({
       scrollLogs()
     }
 
-    watch(
-      () => props.play,
-      (play) => {
-        let nextLogTimeout: number | undefined
-        if (play && logs.length) {
-          const currentTime = logs[cursor].time
+    let nextLogTimeout: number | undefined
+    const checkLog = (seekTime?: number) => {
+      if (logs.hasOwnProperty(cursor) && logs.hasOwnProperty(cursor + 1)) {
+        const currentTime = seekTime
+          ? beginTime + seekTime * 1000
+          : logs[cursor].time
+        nextLogTimeout = setTimeout(() => {
           cursor++
-          console.log(logs[cursor])
-          nextLogTimeout = setTimeout(() => {
-            displayedLogs.value.push(logs[cursor])
-            scrollLogs()
-            // trigger next log timeout
-          }, logs[cursor].time - currentTime)
-        } else {
-          if (nextLogTimeout) clearTimeout(nextLogTimeout)
-        }
+          displayedLogs.value.push(logs[cursor])
+          scrollLogs()
+          checkLog()
+        }, logs[cursor + 1].time - currentTime)
+      }
+    }
+
+    watch(
+      () => props.status,
+      (status) => {
+        if (status?.play) checkLog(status.atTime)
+        else clearTimeout(nextLogTimeout)
+      }
+    )
+
+    watch(
+      () => props.seekTime,
+      (seekTime) => {
+        if (props.status?.play) clearTimeout(nextLogTimeout)
+        updateView(seekTime)
+        if (props.status?.play) checkLog(seekTime)
       }
     )
 

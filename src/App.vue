@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="bg-gray-900 h-full w-96 relative">
-      <Logs :file="logFile" :play="playing"></Logs>
+      <Logs :file="logFile" :status="status" :seek-time="seekTime"></Logs>
       <div class="w-full absolute top-0 left-0 text-center p-2">
         <FilePicker @change="pickedLogs($event)">Pick Logs</FilePicker>
       </div>
@@ -30,7 +30,8 @@ export default defineComponent({
     const videoPlayer = ref<any>()
     const videoUrl = ref('')
     const logFile = ref<File>()
-    const playing = ref(false)
+    const status = ref({ play: false, atTime: 0 })
+    const seekTime = ref(0)
 
     const pickedVideo = (e: Event) => {
       const input = e.currentTarget as HTMLInputElement
@@ -49,10 +50,19 @@ export default defineComponent({
 
     onMounted(() => {
       if (videoPlayer.value) {
-        videoPlayer.value.player.on('playing', () => (playing.value = true))
-        videoPlayer.value.player.on('pause', () => (playing.value = false))
-        videoPlayer.value.player.on('seeked', (e) =>
-          console.log(e.detail.plyr.currentTime)
+        videoPlayer.value.player.on(
+          'playing',
+          (e) =>
+            (status.value = { play: true, atTime: e.detail.plyr.currentTime })
+        )
+        videoPlayer.value.player.on(
+          'pause',
+          (e) =>
+            (status.value = { play: false, atTime: e.detail.plyr.currentTime })
+        )
+        videoPlayer.value.player.on(
+          'seeked',
+          (e) => (seekTime.value = e.detail.plyr.currentTime)
         )
       }
     })
@@ -64,7 +74,8 @@ export default defineComponent({
       videoPlayer,
       videoUrl,
       logFile,
-      playing,
+      status,
+      seekTime,
     }
   },
 })
