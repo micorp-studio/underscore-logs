@@ -1,3 +1,9 @@
+# Underscore\_ Logs Viewer
+
+Un petit site pour voir les logs d'Underscore\_.
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/5ee92826-7fc2-4f52-9b17-1d91d225e947/deploy-status)](https://app.netlify.com/sites/underscorelogs/deploys)
+
 # Vue 3 + Typescript + Vite
 
 This template should help get you started developing with Vue 3 and Typescript in Vite.
