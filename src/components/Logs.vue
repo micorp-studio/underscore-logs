@@ -23,7 +23,10 @@ type Log = {
 export default defineComponent({
   props: {
     file: { type: Object as PropType<File> },
-    status: { type: Object as PropType<{ play: boolean; atTime: number }> },
+    status: {
+      type: Object as PropType<{ play: boolean; atTime: number }>,
+      required: true,
+    },
     seekTime: { type: Number, default: 0 },
   },
   setup(props) {
@@ -69,7 +72,7 @@ export default defineComponent({
     watch(
       () => props.status,
       (status) => {
-        if (status?.play) checkLog(status.atTime)
+        if (status.play) checkLog(status.atTime)
         else clearTimeout(nextLogTimeout)
       }
     )
@@ -77,9 +80,9 @@ export default defineComponent({
     watch(
       () => props.seekTime,
       (seekTime) => {
-        if (props.status?.play) clearTimeout(nextLogTimeout)
+        if (props.status.play) clearTimeout(nextLogTimeout)
         updateView(seekTime)
-        if (props.status?.play) checkLog(seekTime)
+        if (props.status.play) checkLog(seekTime)
       }
     )
 
@@ -106,7 +109,7 @@ export default defineComponent({
               return
             }
             beginTime = firstLog.time
-            updateView(0)
+            updateView(props.status.atTime)
           }
           fileReader.readAsText(file)
         }
