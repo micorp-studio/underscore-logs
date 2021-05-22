@@ -37,7 +37,6 @@ export default defineComponent({
       const input = e.currentTarget as HTMLInputElement
       if (input.files && input.files.length > 0) {
         videoUrl.value = URL.createObjectURL(input.files[0])
-        // load logs
       }
     }
 
@@ -52,17 +51,17 @@ export default defineComponent({
       if (videoPlayer.value) {
         videoPlayer.value.player.on(
           'playing',
-          (e) =>
+          (e: any) =>
             (status.value = { play: true, atTime: e.detail.plyr.currentTime })
         )
         videoPlayer.value.player.on(
           'pause',
-          (e) =>
+          (e: any) =>
             (status.value = { play: false, atTime: e.detail.plyr.currentTime })
         )
         videoPlayer.value.player.on(
           'seeked',
-          (e) => (seekTime.value = e.detail.plyr.currentTime)
+          (e: any) => (seekTime.value = e.detail.plyr.currentTime)
         )
       }
     })
