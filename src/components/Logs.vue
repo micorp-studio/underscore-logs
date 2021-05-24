@@ -20,14 +20,17 @@ type Log = {
   time: number
 }
 
+type Params = {
+  play: boolean
+  seekTime: number
+  currentTime: number
+  speed: number
+}
+
 export default defineComponent({
   props: {
     file: { type: Object as PropType<File> },
-    status: {
-      type: Object as PropType<{ play: boolean; atTime: number }>,
-      required: true,
-    },
-    seekTime: { type: Number, default: 0 },
+    params: { type: Object as PropType<Params>, required: true },
   },
   setup(props) {
     let logs: Log[] = []
@@ -63,26 +66,37 @@ export default defineComponent({
         nextLogTimeout = setTimeout(() => {
           cursor++
           displayedLogs.value.push(logs[cursor])
+          if (displayedLogs.value.length > 100) displayedLogs.value.shift()
           scrollLogs()
           checkLog()
-        }, logs[cursor + 1].time - currentTime)
+        }, (logs[cursor + 1].time - currentTime) / props.params.speed)
       }
     }
 
     watch(
-      () => props.status,
-      (status) => {
-        if (status.play) checkLog(status.atTime)
+      () => props.params.play,
+      (play) => {
+        if (play) checkLog(props.params.currentTime)
         else clearTimeout(nextLogTimeout)
       }
     )
 
     watch(
-      () => props.seekTime,
+      () => props.params.seekTime,
       (seekTime) => {
-        if (props.status.play) clearTimeout(nextLogTimeout)
+        if (props.params.play) clearTimeout(nextLogTimeout)
         updateView(seekTime)
-        if (props.status.play) checkLog(seekTime)
+        if (props.params.play) checkLog(seekTime)
+      }
+    )
+
+    watch(
+      () => props.params.speed,
+      (speed) => {
+        if (props.params.play) {
+          clearTimeout(nextLogTimeout)
+          checkLog(props.params.currentTime)
+        }
       }
     )
 
@@ -109,7 +123,7 @@ export default defineComponent({
               return
             }
             beginTime = firstLog.time
-            updateView(props.status.atTime)
+            updateView(props.params.currentTime)
           }
           fileReader.readAsText(file)
         }

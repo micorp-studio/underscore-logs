@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="bg-gray-900 h-full w-96 relative">
-      <Logs :file="logFile" :status="status" :seek-time="seekTime"></Logs>
+      <Logs :file="logFile" :params="logsParams"></Logs>
       <div class="w-full absolute top-0 left-0 text-center p-2">
         <FilePicker @change="pickedLogs($event)">Pick Logs</FilePicker>
       </div>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, onMounted, reactive, ref } from 'vue'
 import FilePicker from './components/FilePicker.vue'
 import Logs from './components/Logs.vue'
 
@@ -30,8 +30,12 @@ export default defineComponent({
     const videoPlayer = ref<any>()
     const videoUrl = ref('')
     const logFile = ref<File>()
-    const status = ref({ play: false, atTime: 0 })
-    const seekTime = ref(0)
+    const logsParams = reactive({
+      play: false,
+      seekTime: 0,
+      currentTime: 0,
+      speed: 1,
+    })
 
     const pickedVideo = (e: Event) => {
       const input = e.currentTarget as HTMLInputElement
@@ -49,20 +53,23 @@ export default defineComponent({
 
     onMounted(() => {
       if (videoPlayer.value) {
-        videoPlayer.value.player.on(
-          'playing',
-          (e: any) =>
-            (status.value = { play: true, atTime: e.detail.plyr.currentTime })
-        )
-        videoPlayer.value.player.on(
-          'pause',
-          (e: any) =>
-            (status.value = { play: false, atTime: e.detail.plyr.currentTime })
-        )
-        videoPlayer.value.player.on(
-          'seeked',
-          (e: any) => (seekTime.value = e.detail.plyr.currentTime)
-        )
+        videoPlayer.value.player.on('playing', (e: any) => {
+          logsParams.play = true
+          logsParams.currentTime = e.detail.plyr.currentTime
+        })
+        videoPlayer.value.player.on('pause', (e: any) => {
+          logsParams.play = false
+          logsParams.currentTime = e.detail.plyr.currentTime
+        })
+
+        videoPlayer.value.player.on('seeked', (e: any) => {
+          logsParams.seekTime = e.detail.plyr.currentTime
+          logsParams.currentTime = e.detail.plyr.currentTime
+        })
+        videoPlayer.value.player.on('ratechange', (e: any) => {
+          logsParams.speed = e.detail.plyr.speed
+          logsParams.currentTime = e.detail.plyr.currentTime
+        })
       }
     })
 
@@ -73,8 +80,7 @@ export default defineComponent({
       videoPlayer,
       videoUrl,
       logFile,
-      status,
-      seekTime,
+      logsParams,
     }
   },
 })
