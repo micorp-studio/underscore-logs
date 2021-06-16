@@ -3,7 +3,9 @@
     class="text-white text-opacity-50 p-5 h-full text-sm overflow-y-auto"
     ref="logsContainer"
   >
-    <p v-for="log of displayedLogs">{{ log.msg }}</p>
+    <p v-for="log of displayedLogs">
+      {{ log.msg }} <span v-if="log.micId">{{ log.micId }}</span>
+    </p>
     <div ref="endAnchor"></div>
   </div>
 </template>
@@ -18,6 +20,7 @@ type Log = {
   name: string
   pid: number
   time: number
+  micId?: string
 }
 
 type Params = {
