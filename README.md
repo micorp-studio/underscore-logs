@@ -1,6 +1,7 @@
 # Underscore\_ Logs Viewer
 
 Un petit site pour voir les logs d'Underscore\_.
+A website to see underscore_ 's Logs.
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/5ee92826-7fc2-4f52-9b17-1d91d225e947/deploy-status)](https://app.netlify.com/sites/underscorelogs/deploys)
 
